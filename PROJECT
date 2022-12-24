@@ -1,0 +1,16 @@
+domain: test.com
+layout:
+- go.kubebuilder.io/v3
+projectName: test-operator
+repo: github.com/Marevo28/test-operator-v2
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: test.com
+  group: elastic
+  kind: ElasticIndex
+  path: github.com/Marevo28/test-operator-v2/api/v1
+  version: v1
+version: "3"

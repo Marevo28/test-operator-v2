@@ -1,0 +1,12 @@
+apiVersion: elastic.test.com/v1
+kind: ElasticIndex
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticindex
+    app.kubernetes.io/instance: elasticindex-sample
+    app.kubernetes.io/part-of: test-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: test-operator
+  name: elasticindex-sample
+spec:
+  # TODO(user): Add fields here
