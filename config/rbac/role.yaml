@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindices/status
+  verbs:
+  - get
+  - patch
+  - update
