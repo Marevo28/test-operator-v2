@@ -35,21 +35,15 @@ spec:
           spec:
             description: ElasticIndexSpec defines the desired state of ElasticIndex
             properties:
-              image:
+              name:
                 description: Foo is an example field of ElasticIndex. Edit elasticindex_types.go
                   to remove/update
                 type: string
-              name:
-                type: string
               settings:
                 type: string
-              size:
-                format: int32
-                type: integer
             required:
             - name
             - settings
-            - size
             type: object
           status:
             description: ElasticIndexStatus defines the observed state of ElasticIndex

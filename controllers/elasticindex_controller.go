@@ -25,12 +25,12 @@ import (
 
 	// "k8s.io/apimachinery/pkg/api/errors"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/cri-api/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"encoding/json"
 	elasticv1 "github.com/Marevo28/test-operator-v2/api/v1"
 	"net/http"
 )
@@ -56,56 +56,41 @@ type ElasticIndexReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.1/pkg/reconcile
 func (r *ElasticIndexReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log.Println("ElasticIndex", req.NamespacedName)
-	log.Println("Processing ElasticIndexReconciler.")
+
 	elasticIndex := &appsv1.ElasticIndex{}
-	log.Println(elasticIndex)
-	err := r.Client.Get(ctx, req.NamespacedName, elasticIndex)
-	if err != nil {
+
+	if err := r.Client.Get(ctx, req.NamespacedName, elasticIndex); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			log.Info("ElasticIndex resource not found. Ignoring since object must be deleted")
-			return ctrl.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
-		log.Error(err, "Failed to get ElasticIndex")
-		return ctrl.Result{}, err
-	}
-	// Check if the deployment already exists, if not create a new one
-	log.Println("Check found")
-	// found := &a.Deployment{}
-	// log.Println(found)
-	// err = r.Client.Get(ctx, types.NamespacedName{Name: elasticIndex.Name, Namespace: elasticIndex.Namespace}, found)
-	// if err != nil && errors.IsNotFound(err) {
-	// dep := r.deployHelloApp(elasticIndex)
-	code := CustomCreateIndex(elasticIndex)
-	log.Info(code)
-	// 	log.Info("Creating a new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
-	// 	err = r.Client.Create(ctx, dep)
-	// 	if err != nil {
-	// 		log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	// Deployment created successfully - return and requeue
-	// 	return ctrl.Result{Requeue: true}, nil
-	// } else if err != nil {
-	// 	log.Error(err, "Failed to get Deployment")
-	// 	return ctrl.Result{}, err
-	// }
 
-	// Check desired amount of deploymets.
-	// size := elasticIndex.Spec.Size
-	// if *found.Spec.Replicas != size {
-	// 	found.Spec.Replicas = &size
-	// 	err = r.Client.Update(ctx, found)
-	// 	if err != nil {
-	// 		log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	// Spec updated - return and requeue
-	// 	return ctrl.Result{Requeue: true}, nil
-	// }
+			log.Info("response of delete: ", req.Name)
+			response, err := DeleteIndex(ctx, req.Name)
+			if err != nil {
+				log.Error(err, "error while deleting elasticIndex", "indexName", elasticIndex.Spec.Name)
+			} else {
+				log.Info("response of delete: ", response)
+			}
+			log.Info("ElasticIndex ", elasticIndex.Spec.Name, " has been deleted")
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
+		log.Error(err, "Failed to get ElasticIndex")
+	}
+	if deleteRequest, err := deleteExternalResources(ctx, elasticIndex, r); err != nil {
+		return ctrl.Result{}, err
+	} else if !deleteRequest {
+		log.Info("create/update ElasticIndex", "indexName ", elasticIndex.Spec.Name)
+		code, err := CreateUpdateIndex(elasticIndex)
+		if err != nil {
+			log.Error(err, "error while updating elasticIndex", "indexName", elasticIndex.Spec.Name)
+		} else if code == 200 {
+			log.Info("Индекс успешно обновлён")
+		} else {
+			log.Info("Не удалось обновить индекс", elasticIndex.Name, "Код запроса:", code)
+		}
+	}
 	return ctrl.Result{}, nil
 }
 
@@ -116,31 +101,65 @@ func (r *ElasticIndexReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func CustomCreateIndex(ha *appsv1.ElasticIndex) int {
+func CreateUpdateIndex(ha *appsv1.ElasticIndex) (int, error) {
 	name := ha.Spec.Name
 	settings := ha.Spec.Settings
-
 	client := &http.Client{}
-
 	var datatest = strings.NewReader(settings)
 	req, err := http.NewRequest("PUT", "http://elasticsearch-master.kube-elasticsearch.svc.cluster.local:9200/"+name, datatest)
 	if err != nil {
 		panic(err)
 	}
-
-	// set the request header Content-Type for json
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
-
 	code := resp.StatusCode
-	return code
+	return code, err
 }
 
-type Iot struct {
-	Id      int             `json:"id"`
-	Name    string          `json:"name"`
-	Context json.RawMessage `json:"context"` // RawMessage here! (not a string)
+func DeleteIndex(ctx context.Context, indexName string) (int, error) {
+	client := &http.Client{}
+	url := "http://elasticsearch-master.kube-elasticsearch.svc.cluster.local:9200/" + indexName
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		panic(err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	code := resp.StatusCode
+	return code, err
+}
+
+func deleteExternalResources(ctx context.Context, elasticIndex *appsv1.ElasticIndex, r *ElasticIndexReconciler) (bool, error) {
+	deleteRequest := false
+	finalizerName := "elastic.test.com/finalizer"
+
+	if elasticIndex.ObjectMeta.DeletionTimestamp.IsZero() {
+		if controllerutil.ContainsFinalizer(elasticIndex, finalizerName) {
+			log.Info("register a finalizer")
+			elasticIndex.ObjectMeta.Finalizers = append(elasticIndex.ObjectMeta.Finalizers, finalizerName)
+			if err := r.Update(ctx, elasticIndex); err != nil {
+				return deleteRequest, err
+			}
+		}
+	} else {
+		log.Info("elasticindex is being deleted")
+		deleteRequest = true
+		if controllerutil.ContainsFinalizer(elasticIndex, finalizerName) {
+			if _, err := DeleteIndex(ctx, elasticIndex.Spec.Name); err != nil {
+				log.Error(err, "error while deleting elasticIndex", "indexName", elasticIndex.Spec.Name)
+			}
+			// remove finalizer from the list and update it.
+			controllerutil.RemoveFinalizer(elasticIndex, finalizerName)
+			if err := r.Update(ctx, elasticIndex); err != nil {
+				return deleteRequest, err
+			}
+		}
+	}
+	log.Info("Status deleteRequest: ", deleteRequest)
+	return deleteRequest, nil
 }

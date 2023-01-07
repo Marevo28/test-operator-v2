@@ -7,10 +7,8 @@ metadata:
     app.kubernetes.io/part-of: test-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: test-operator
-  name: elasticindex-sample-twitter
+  name: twitter
 spec:
-  image: "nginx/test"
-  size: 1
   name: "twitter"
   settings: |-
     {

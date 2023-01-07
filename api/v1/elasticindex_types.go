@@ -29,8 +29,6 @@ type ElasticIndexSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of ElasticIndex. Edit elasticindex_types.go to remove/update
-	Image    string `json:"image,omitempty"`
-	Size     int32  `json:"size"`
 	Name     string `json:"name"`
 	Settings string `json:"settings"`
 }
