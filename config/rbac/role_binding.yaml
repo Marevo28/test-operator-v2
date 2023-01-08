@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/part-of: test-operator
     app.kubernetes.io/managed-by: kustomize
   name: manager-rolebinding
+  namespace: demo-operator-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -16,4 +17,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: controller-manager
-  namespace: system
+  namespace: demo-operator-system

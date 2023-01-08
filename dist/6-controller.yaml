@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: demo-operator-controller
-          image: marevo28/test-operator:0.0.48
+          image: marevo28/test-operator:0.0.49
           imagePullPolicy: Always
-      serviceAccountName: demo-operator-system
+      serviceAccountName: controller-manager
 

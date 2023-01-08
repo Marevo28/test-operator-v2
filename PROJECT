@@ -22,4 +22,13 @@ resources:
   kind: ElasticIndexTemplate
   path: github.com/Marevo28/test-operator-v2/api/v1
   version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: test.com
+  group: elastic
+  kind: ElasticIndexLifecyclePolicies
+  path: github.com/Marevo28/test-operator-v2/api/v1
+  version: v1
 version: "3"

@@ -40,15 +40,14 @@ make docker-build IMG=marevo28/test-operator:0.0.4
 make docker-push IMG=marevo28/test-operator:0.0.4
 
 ## Деплой в кластер
-
 kubectl apply -f ..\..\Github\test-operator\config\crd\bases\
-
-
-kubectl apply -f ..\..\Github\test-operator\dist\6-controller.yaml
-kubectl apply -f ..\..\Github\test-operator\dist\3-role.yaml
+kubectl apply -f ..\..\Github\test-operator\config\rbac\role_binding.yaml
+kubectl apply -f ..\..\Github\test-operator\config\rbac\role.yaml
+kubectl apply -f ..\..\Github\test-operator\config\rbac\service_account.yaml
 kubectl apply -f ..\..\Github\test-operator\dist\6-controller.yaml
 
 
 ## Деплой тестового примера
 kubectl apply -f ..\..\Github\test-operator\config\samples\elastic_v1_elasticindex.yaml
+kubectl apply -f ..\..\Github\test-operator\config\samples\elastic_v1_elasticindexlifecyclepolicies.yaml
 kubectl apply -f ..\..\Github\test-operator\config\samples\elastic_v1_elasticindextemplate.yaml

@@ -4,7 +4,34 @@ kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: manager-role
+  namespace: demo-operator-system
 rules:
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindexlifecyclepolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindexlifecyclepolicies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindexlifecyclepolicies/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - elastic.test.com
   resources:
