@@ -27,6 +27,7 @@ source ~/.bashrc
 
 kubebuilder init --domain test.com --repo github.com/Marevo28/test-operator-v2
 kubebuilder create api --group elastic --version v1 --kind ElasticIndex  --resource --controller
+kubebuilder create api --group elastic --version v1 --kind ElasticIndexLifecyclePolicies  --resource --controller
 kubebuilder create api --group elastic --version v1 --kind ElasticIndexTemplate  --resource --controller
 kubebuilder create api --group elastic --version v1 --kind ElasticDataStream  --resource --controller
 
@@ -39,7 +40,15 @@ make docker-build IMG=marevo28/test-operator:0.0.4
 make docker-push IMG=marevo28/test-operator:0.0.4
 
 ## Деплой в кластер
-kubectl apply -f ..\..\Github\test-operator\dist\
+
+kubectl apply -f ..\..\Github\test-operator\config\crd\bases\
+
+
+kubectl apply -f ..\..\Github\test-operator\dist\6-controller.yaml
+kubectl apply -f ..\..\Github\test-operator\dist\3-role.yaml
+kubectl apply -f ..\..\Github\test-operator\dist\6-controller.yaml
+
 
 ## Деплой тестового примера
-kubectl apply -f ..\..\Github\test-operator\config\samples
+kubectl apply -f ..\..\Github\test-operator\config\samples\elastic_v1_elasticindex.yaml
+kubectl apply -f ..\..\Github\test-operator\config\samples\elastic_v1_elasticindextemplate.yaml

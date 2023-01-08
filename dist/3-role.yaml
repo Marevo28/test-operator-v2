@@ -6,21 +6,10 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - elastic.test.com
   resources:
   - elasticindices
+  - elasticindextemplates
   verbs:
   - create
   - delete
@@ -33,12 +22,14 @@ rules:
   - elastic.test.com
   resources:
   - elasticindices/finalizers
+  - elasticindextemplates/finalizers
   verbs:
   - update
 - apiGroups:
   - elastic.test.com
   resources:
   - elasticindices/status
+  - elasticindextemplates/status
   verbs:
   - get
   - patch
