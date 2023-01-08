@@ -8,6 +8,32 @@ rules:
 - apiGroups:
   - elastic.test.com
   resources:
+  - elasticindextemplates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindextemplates/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - elastic.test.com
+  resources:
+  - elasticindextemplates/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - elastic.test.com
+  resources:
   - elasticindices
   verbs:
   - create

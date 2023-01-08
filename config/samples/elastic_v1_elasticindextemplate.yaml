@@ -1,0 +1,32 @@
+apiVersion: elastic.test.com/v1
+kind: ElasticIndexTemplate
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticindextemplate
+    app.kubernetes.io/instance: elasticindextemplate-sample
+    app.kubernetes.io/part-of: test-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: test-operator
+  name: gnivc-fns-etl.event-collector
+spec:
+  name: "gnivc-fns-etl.event-collector"
+  settings: |-  
+    {
+      "template": {
+        "settings": {
+          "index": {
+            "lifecycle": {
+              "name": "gnivc-fns-etl-event-collector-clean-policy"
+            },
+            "number_of_shards": "2",
+            "number_of_replicas": "0"
+          }
+        }
+      },
+      "index_patterns": [
+        "gnivc-fns-etl-dev.event-collector.*"
+      ],
+      "data_stream": {
+        "hidden": false
+      }
+    }

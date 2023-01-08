@@ -23,8 +23,6 @@ import (
 	appsv1 "github.com/Marevo28/test-operator-v2/api/v1"
 	log "github.com/sirupsen/logrus"
 
-	// "k8s.io/apimachinery/pkg/api/errors"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -65,18 +63,13 @@ func (r *ElasticIndexReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			log.Info("ElasticIndex resource not found. Ignoring since object must be deleted")
-
-			log.Info("response of delete: ", req.Name)
-			response, err := DeleteIndex(ctx, req.Name)
+			_, err := DeleteIndex(ctx, req.Name)
 			if err != nil {
 				log.Error(err, "error while deleting elasticIndex", "indexName", elasticIndex.Spec.Name)
-			} else {
-				log.Info("response of delete: ", response)
 			}
 			log.Info("ElasticIndex ", elasticIndex.Spec.Name, " has been deleted")
 			return ctrl.Result{}, client.IgnoreNotFound(err)
 		}
-		log.Error(err, "Failed to get ElasticIndex")
 	}
 	if deleteRequest, err := deleteExternalResources(ctx, elasticIndex, r); err != nil {
 		return ctrl.Result{}, err
