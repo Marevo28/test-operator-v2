@@ -16,6 +16,16 @@ spec:
       containers:
         - name: demo-operator-controller
           image: marevo28/test-operator:0.0.49
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent 
+          resources:
+            requests:
+              cpu: 5m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env: 
+          - name: ELASTIC_URL
+            value: "http://elasticsearch-master.kube-elasticsearch.svc.cluster.local:9200"
       serviceAccountName: controller-manager
 

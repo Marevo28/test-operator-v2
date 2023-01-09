@@ -33,12 +33,14 @@ import (
 
 	elasticv1 "github.com/Marevo28/test-operator-v2/api/v1"
 	"github.com/Marevo28/test-operator-v2/controllers"
+	log "github.com/sirupsen/logrus"
 	//+kubebuilder:scaffold:imports
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme     = runtime.NewScheme()
+	setupLog   = ctrl.Log.WithName("setup")
+	elasticUrl = os.Getenv("ELASTIC_URL")
 )
 
 func init() {
@@ -62,6 +64,11 @@ func main() {
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
+
+	if elasticUrl == "" {
+		log.Info("elasticUrl is not defined, uses url http://elasticsearch-master.kube-elasticsearch.svc.cluster.local:9200")
+		elasticUrl = "http://elasticsearch-master.kube-elasticsearch.svc.cluster.local:9200"
+	}
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
